@@ -1,0 +1,18 @@
+Picasa JSON Feed Parser (PJFP) was developed to capture the RSS feed from Picasa in JSON. It currently parses images and captions from the specified Picasa galleries. It also currently spits out images inside of div tags since the intended purpose of this script is to be used in conjunction with an image slideshow/gallery of some sort.
+
+All code is provided AS-IS. This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+- Rory Cronin-Hardy 2011
+
+config.inc IS REQUIRED by pjfp.inc
+Be sure to have it available or this system will not function!
+
+Adding 
+
+<FilesMatch "\.inc$">
+	Order allow,deny
+	Deny from all
+</FilesMatch>
+
+to your .htaccess file is recommended if you use .inc for PHP includes.
+If a .inc file is requested, all of the code will be revealed as plain text (which is usually very undesirable).
