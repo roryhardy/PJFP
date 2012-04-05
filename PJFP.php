@@ -7,9 +7,6 @@
  * @version 1.2
  * @todo Make get_data() return associative arrays or both as well as integer based arrays.
  * @todo Add a caching mechanism
- * Description : Google Picasa Parser.
- * Please note that when an exception is thrown it will likely be in the gallery system...
- *   you may have to view the page source to see it
  */
 
 // ------------------------------------------------------------------------
@@ -77,9 +74,9 @@ class PJPF {
 	 * @param array $conf - The passed in array from the user to the constructor.
 	 */
 	final private function build_conf(&$conf) {
-		ob_start(); #Hook output buffer
+		ob_start();
 		include ($this -> config_file);
-		ob_end_clean(); #Clear output buffer
+		ob_end_clean();
 		if (!isset($pjfp_conf))
 			throw new Exception("PJFP Failed to load the config file [" . $this -> config_file . "]");
 		if (is_array($conf))
@@ -110,7 +107,7 @@ class PJPF {
 		$url = sprintf("http://picasaweb.google.com/data/feed/base/user/%s/albumid/%s%s",
 			$this -> config['user'],
 			$this -> albumId,
-			"?alt=json&fields=entry(media:group)&imgmax=577" // Down here to shorten Completed URL visually
+			"?alt=json&fields=entry(media:group)&imgmax=577" # Down here to shorten Completed URL visually
 		);
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
@@ -141,7 +138,7 @@ class PJPF {
 				$this -> config['user'],
 				$this -> albumId,
 				$this -> config['max_width'],
-				"&alt=json&fields=entry(media:group)" // Down here to shorten Completed URL visually
+				"&alt=json&fields=entry(media:group)" # Down here to shorten Completed URL visually
 			);
 			$out .= "Host: $url\r\n";
 			$out .= "Connection: Close\r\n\r\n";
