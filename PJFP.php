@@ -3,7 +3,7 @@
  * @package Picasa JSON Feed Parser
  * @category Libraries
  * @author Rory Cronin-Hardy (GneatGeek)
- * @link oregonstate.edu/~croninhr/
+ * @link http://github.com/gneatgeek/PJFP
  * @version 1.2
  * @todo Make get_data() return associative arrays or both as well as integer based arrays.
  * @todo Add a caching mechanism

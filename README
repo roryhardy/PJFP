@@ -18,5 +18,5 @@ Adding
 	Deny from all
 </FilesMatch>
 
-to your .htaccess file is recommended if you use .inc for PHP includes.
+to your .htaccess file is recommended.
 If a .inc file is requested, all of the code will be revealed as plain text (which is usually very undesirable).
