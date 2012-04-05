@@ -1,11 +1,15 @@
-Picasa JSON Feed Parser (PJFP) was developed to capture the RSS feed from Picasa in JSON. It currently parses images and captions from the specified Picasa galleries. It also currently spits out images inside of div tags since the intended purpose of this script is to be used in conjunction with an image slideshow/gallery of some sort.
+Picasa JSON Feed Parser (PJFP) was developed to capture the RSS feed from Picasa in JSON. It currently parses images, image width, image height, and captions from the specified Picasa galleries. It returns a data array.  What to do with that data is up to you.
+
+Currently this system assumes the majority of images in an album are horizontal.
 
 All code is provided AS-IS. This code is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 - Rory Cronin-Hardy 2011
 
-config.inc IS REQUIRED by pjfp.inc
-Be sure to have it available or this system will not function!
+PJFP_config.php IS REQUIRED by PJFP.php
+Be sure to have it available or this system will not function!  You can specify an alternate filename and/or path in the class variables.
+
+If you prefer to use .inc instead of .php for include files
 
 Adding 
 

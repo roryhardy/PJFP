@@ -1,44 +1,47 @@
 <?php
-if ( ! defined('EXT')){
-	exit('No Direct Script Access!');
-}
 /**
  * @package Picasa JSON Feed Parser
  * @category Libraries
  * @author Rory Cronin-Hardy (GneatGeek)
  * @link oregonstate.edu/~croninhr/
  * @version 1.2
+ * @todo Make get_data() return associative arrays or both as well as integer based arrays.
  * @todo Add a caching mechanism
  * Description : Google Picasa Parser.
- * Please note that when an exception is thrown it will likely be in the gallery system... you may have to view the page source to see it
+ * Please note that when an exception is thrown it will likely be in the gallery system...
+ *   you may have to view the page source to see it
  */
 
 // ------------------------------------------------------------------------
 
-
 /**
  * Picasa JSON Feed Parser (PJFP) Class
- * This class ... FILL IN
+ * This class parses a given Picasa RSS feed in JSON format.
+ * It will get image URLS, Width, Height, and Captions for a particular album.
+ * @author Rory Cronin-Hardy (GneatGeek)
+ * @link oregonstate.edu/~croninhr/
  */
 class PJPF {
 	/**
-	 * The name and path of the config file to use. This shouldn't need to be changed.
+	 * The name and absolute path of the config file to use. This shouldn't need to be changed.
+	 * If the file is in the same dir as PJFP the path may be omitted!
 	 * If it does, do it here!
 	 * @var string
 	 */
 	private $config_file = "PJFP_config.php";
+
 	/**
 	 * Array of all loaded config values. (See config.inc)
 	 * @var array
 	 */
 	private $config = array();
-	
+
 	/**
 	 * Array of all parsed data.
 	 * @var array
 	 */
 	private $data = array();
-	
+
 	/**
 	 * Album ID of album to parse.
 	 * @var int
@@ -54,7 +57,7 @@ class PJPF {
 	 */
 	public function __construct($albumId, $conf = NULL) {
 		$this -> albumId = $albumId;
-		$this -> _build_conf($conf);
+		$this -> build_conf($conf);
 	}
 
 	/**
@@ -69,32 +72,43 @@ class PJPF {
 
 	/**
 	 * Build the internal config array based off of the config file and user defined parameters
+	 * Uses output buffering to safely include the config file.
 	 * @access private
 	 * @param array $conf - The passed in array from the user to the constructor.
 	 */
-	final private function _build_conf(&$conf){
-		require_once ($this->config_file); # Include the config file.  Throw an error if not found!
-		if(is_array($conf))
+	final private function build_conf(&$conf) {
+		ob_start(); #Hook output buffer
+		include ($this -> config_file);
+		ob_end_clean(); #Clear output buffer
+		if (!isset($pjfp_conf))
+			throw new Exception("PJFP Failed to load the config file [" . $this -> config_file . "]");
+		if (is_array($conf))
 			$pjfp_conf = array_merge($pjfp_conf, $conf);
-		foreach($pjfp_conf as $key => $val)
-			$this->set_conf($key, $val);
+		foreach ($pjfp_conf as $key => $val)
+			$this -> set_conf($key, $val);
 	}
-	
-	public function get_data(){
-		if(empty($this->data))
-			$this -> _json();
-		return $this->data;
+
+	/**
+	 * Method to retrieve the 2D array of data created by json()
+	 * Format is array(URL, Width, Height, Caption) int keys only ATM
+	 * Calls json() if data array is not yet built.
+	 * @return array
+	 */
+	public function get_data() {
+		if (empty($this -> data))
+			$this -> json();
+		return $this -> data;
 	}
 
 	/**
 	 * Basic curl method to get data from Picasa
 	 * @access private
 	 * @throws Exception - curl failed.
-	 * @return string Requested Data From Picasa.
+	 * @return string
 	 */
-	private function _curl() {
+	private function curl() {
 		$url = sprintf("http://picasaweb.google.com/data/feed/base/user/%s/albumid/%s%s",
-			$this->config['user'],
+			$this -> config['user'],
 			$this -> albumId,
 			"?alt=json&fields=entry(media:group)&imgmax=577" // Down here to shorten Completed URL visually
 		);
@@ -105,7 +119,7 @@ class PJPF {
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($ch, CURLOPT_TIMEOUT, 10);
 		if (!$ret = curl_exec($ch))
-			throw new Exception("An error occured in method _curl()! - " . $this -> cURL . curl_error($ch));
+			throw new Exception("An error occured in method curl()! - " . $this -> cURL . curl_error($ch));
 		return ($ret);
 	}
 
@@ -114,7 +128,7 @@ class PJPF {
 	 * Both methods ultimately do the same thing.
 	 * @access private
 	 * @throws Exception - socket failed
-	 * @return string Requested JSON string from Picasa
+	 * @return string
 	 */
 	private function socket() {
 		$ret = NULL;
@@ -124,9 +138,9 @@ class PJPF {
 			throw new Exception("An error occured in method socket()! - $errstr ($errno)");
 		else {
 			$out = sprintf("GET /data/feed/base/user/%s/albumid/%s?imgmax=%d%s HTTP/1.1\r\n",
-				$this->config['user'],
+				$this -> config['user'],
 				$this -> albumId,
-				$this->config['max_width'],
+				$this -> config['max_width'],
 				"&alt=json&fields=entry(media:group)" // Down here to shorten Completed URL visually
 			);
 			$out .= "Host: $url\r\n";
@@ -145,21 +159,26 @@ class PJPF {
 	}
 
 	/**
-	 * JSON Method
-	 * @access private
+	 * Method to parse the JSON data fetched from Picasa
 	 * Sets:  $this->data to decoded JSON as an array (NOT AN OBJECT)
+	 * @access private
 	 */
-	private function _json() {
-		$json = ($this -> config['use_curl'] ? $this -> _curl() : $this -> socket());
+	private function json() {
+		$json = ($this -> config['use_curl'] ? $this -> curl() : $this -> socket());
 		if (!$arr = json_decode($json, TRUE))
-			throw new Exception("Could not Decode supplied JSON in method _json()!");
+			throw new Exception("Could not Decode supplied JSON in method json()!");
 		foreach ($arr['feed']['entry'] as $v) {
 			$url = $v['media$group']['media$content'][0]['url'];
 			if ($this -> config['use_HTTPS']) {
 				$url = str_replace("http", "https", $url);
 			}
-			$this -> _image_resize($v['media$group']['media$content'][0]['width'], $v['media$group']['media$content'][0]['height']);
-			$this -> data[] = array($url, $v['media$group']['media$content'][0]['width'], $v['media$group']['media$content'][0]['height'], $v['media$group']['media$description']['$t']);
+			$this -> image_resize($v['media$group']['media$content'][0]['width'], $v['media$group']['media$content'][0]['height']);
+			$this -> data[] = array(
+				$url,
+				$v['media$group']['media$content'][0]['width'],
+				$v['media$group']['media$content'][0]['height'],
+				$v['media$group']['media$description']['$t']
+			);
 		}
 	}
 
@@ -172,17 +191,18 @@ class PJPF {
 	 * @param $width - Variable reference to width
 	 * @param $height - Variable reference to height
 	 */
-	private function _image_resize(&$width, &$height) {
-		if ($height > $this->config['max_height']) {
+	private function image_resize(&$width, &$height) {
+		if ($height > $this -> config['max_height']) {
 			if ($height == $width) {
-				$width = $this->config['max_height'];
-				$height = $this->config['max_height'];
+				$width = $this -> config['max_height'];
+				$height = $this -> config['max_height'];
 			} else {
-				$width = round($width * ($this->config['max_height'] / $height));
-				$height = $this->config['max_height'];
+				$width = round($width * ($this -> config['max_height'] / $height));
+				$height = $this -> config['max_height'];
 			}
 		}
 	}
+
 }
 
 #EOF pjfp.inc
