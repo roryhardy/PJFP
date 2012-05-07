@@ -2,9 +2,9 @@
 /**
  * @package Picasa JSON Feed Parser
  * @category Configuration
- * @author Rory Cronin-Hardy (GneatGeek)
- * @link oregonstate.edu/~croninhr/
- * @version 1.2
+ * @author Rory Hardy (GneatGeek)
+ * @link http://github.com/gneatgeek/PJFP
+ * @version 1.3
  */
 
 // ------------------------------------------------------------------------
@@ -16,17 +16,17 @@
  * 
  * EXPLANATION OF VARIABLES
  * ['user']      The username for the given Picasa Album.
- * ['max_width']  The maximum image width in pixels.
- * ['max_height'] The maximum image height in pixels.
- * ['use_HTTPS']  TRUE/FALSE - Whether to make image URLS use HTTPS or HTTP
+ * ['maxWidth']  The maximum image width in pixels.
+ * ['maxHeight'] The maximum image height in pixels.
+ * ['useHTTPS']  TRUE/FALSE - Whether to make image URLS use HTTPS or HTTP
  *   OR use (empty($_SERVER['HTTPS']) ? FALSE : TRUE); to auto determine [UNTESTED]
- * ['use_curl']   TRUE/FALSE - Whether to use curl or sockets.
+ * ['useCurl']   TRUE/FALSE - Whether to use curl or sockets.
  */
 
-$pjfp_conf['user']       = "";
+$pjfp_conf['user']       = "gneatgeek";
 $pjfp_conf['max_width']  = 550;
 $pjfp_conf['max_height'] = 367;
 $pjfp_conf['use_HTTPS']  = FALSE;
 $pjfp_conf['use_curl']   = TRUE;
 
-# EOF pjfp_config.inc
+# EOF pjfp_config.php

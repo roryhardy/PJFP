@@ -2,9 +2,9 @@
 /**
  * @package Picasa JSON Feed Parser
  * @category Libraries
- * @author Rory Cronin-Hardy (GneatGeek)
+ * @author Rory Hardy [GneatGeek]
  * @link http://github.com/gneatgeek/PJFP
- * @version 1.2
+ * @version 1.3
  * @todo Make get_data() return associative arrays or both as well as integer based arrays.
  * @todo Add a caching mechanism
  */
@@ -14,8 +14,8 @@
 /**
  * Picasa JSON Feed Parser (PJFP) Class
  * This class parses a given Picasa RSS feed in JSON format.
- * It will get image URLS, Width, Height, and Captions for a particular album.
- * @author Rory Cronin-Hardy (GneatGeek)
+ * It will get image URLs, width, height, and captions for a particular album.
+ * @author Rory Hardy [GneatGeek]
  * @link oregonstate.edu/~croninhr/
  */
 class PJPF {
@@ -28,7 +28,7 @@ class PJPF {
 	private $config_file = "PJFP_config.php";
 
 	/**
-	 * Array of all loaded config values. (See config.inc)
+	 * Array of all loaded config values. (See PJFP_config.php)
 	 * @var array
 	 */
 	private $config = array();
@@ -48,8 +48,8 @@ class PJPF {
 	/**
 	 * Constructor
 	 * @access public
-	 * @param string $albumID - Picasa RSS Album ID.
-	 * @param array $conf - Associative array used to override default settings in config.inc.  See config.inc for parameters
+	 * @param string $albumID - Picasa RSS album ID.
+	 * @param array $conf - Associative array used to override default settings in config.inc.  See PJFP_config.php for parameters
 	 * @throws Exception - Variable types are incorrect.
 	 */
 	public function __construct($albumId, $conf = NULL) {
@@ -69,16 +69,13 @@ class PJPF {
 
 	/**
 	 * Build the internal config array based off of the config file and user defined parameters
-	 * Uses output buffering to safely include the config file.
 	 * @access private
 	 * @param array $conf - The passed in array from the user to the constructor.
 	 */
 	final private function build_conf(&$conf) {
-		ob_start();
 		include ($this -> config_file);
-		ob_end_clean();
 		if (!isset($pjfp_conf))
-			throw new Exception("PJFP Failed to load the config file [" . $this -> config_file . "]");
+			throw new Exception("PJFP failed to load the config file [" . $this -> config_file . "]");
 		if (is_array($conf))
 			$pjfp_conf = array_merge($pjfp_conf, $conf);
 		foreach ($pjfp_conf as $key => $val)
@@ -87,7 +84,7 @@ class PJPF {
 
 	/**
 	 * Method to retrieve the 2D array of data created by json()
-	 * Format is array(URL, Width, Height, Caption) int keys only ATM
+	 * Format is array(URL, width, height, caption) int keys only ATM
 	 * Calls json() if data array is not yet built.
 	 * @return array
 	 */
@@ -104,17 +101,18 @@ class PJPF {
 	 * @return string
 	 */
 	private function curl() {
-		$url = sprintf("http://picasaweb.google.com/data/feed/base/user/%s/albumid/%s%s",
+		$url = sprintf("http://picasaweb.google.com/data/feed/base/user/%s/albumid/%s%s&imgmax=%d",
 			$this -> config['user'],
 			$this -> albumId,
-			"?alt=json&fields=entry(media:group)&imgmax=577" # Down here to shorten Completed URL visually
+			"?alt=json&fields=entry(media:group)", # Down here to shorten completed URL visually
+			$this -> config['max_width']
 		);
 		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_FAILONERROR, TRUE);
+		curl_setopt($ch, CURLOPT_URL,            $url);
+		curl_setopt($ch, CURLOPT_FAILONERROR,    TRUE);
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-		curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+		curl_setopt($ch, CURLOPT_TIMEOUT,        10);
 		if (!$ret = curl_exec($ch))
 			throw new Exception("An error occured in method curl()! - " . $this -> cURL . curl_error($ch));
 		return ($ret);
@@ -138,7 +136,7 @@ class PJPF {
 				$this -> config['user'],
 				$this -> albumId,
 				$this -> config['max_width'],
-				"&alt=json&fields=entry(media:group)" # Down here to shorten Completed URL visually
+				"&alt=json&fields=entry(media:group)" # Down here to shorten completed URL visually
 			);
 			$out .= "Host: $url\r\n";
 			$out .= "Connection: Close\r\n\r\n";
@@ -199,7 +197,6 @@ class PJPF {
 			}
 		}
 	}
-
 }
 
-#EOF pjfp.inc
+#EOF pjfp.php
