@@ -4,12 +4,12 @@
  * @category Libraries
  * @author Rory Hardy [GneatGeek]
  * @link http://github.com/gneatgeek/PJFP
- * @version 1.3
+ * @version 1.4
  * @todo Make get_data() return associative arrays or both as well as integer based arrays.
  * @todo Add a caching mechanism
  */
 
-// ------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------
 
 /**
  * Picasa JSON Feed Parser (PJFP) Class
@@ -46,14 +46,22 @@ class PJPF {
 	private $album_id;
 
 	/**
+	 * Key that picasa uses for limited/private galleries.
+	 * @var string
+	 */
+	private $authKey;
+
+	/**
 	 * Constructor
 	 * @access public
 	 * @param string $albumID - Picasa RSS album ID.
 	 * @param array $conf - Associative array used to override default settings in config.inc.  See PJFP_config.php for parameters
+	 * @param string $authKey - Key that picasa uses for limited/private galleries.
 	 * @throws Exception - Variable types are incorrect.
 	 */
-	public function __construct($albumId, $conf = NULL) {
+	public function __construct($albumId, $conf = NULL, $authKey = "") {
 		$this -> albumId = $albumId;
+		$this -> authKey = $authKey;
 		$this -> build_conf($conf);
 	}
 
@@ -75,7 +83,7 @@ class PJPF {
 	final private function build_conf(&$conf) {
 		include ($this -> config_file);
 		if (!isset($pjfp_conf))
-			throw new Exception("PJFP failed to load the config file [" . $this -> config_file . "]");
+			throw new Exception("PJFP failed to load the config file [{$this -> config_file}]");
 		if (is_array($conf))
 			$pjfp_conf = array_merge($pjfp_conf, $conf);
 		foreach ($pjfp_conf as $key => $val)
@@ -88,7 +96,7 @@ class PJPF {
 	 * Calls json() if data array is not yet built.
 	 * @return array
 	 */
-	public function get_data() {
+	public function get_data($type = NULL) {
 		if (empty($this -> data))
 			$this -> json();
 		return $this -> data;
@@ -101,18 +109,18 @@ class PJPF {
 	 * @return string
 	 */
 	private function curl() {
-		$url = sprintf("http://picasaweb.google.com/data/feed/base/user/%s/albumid/%s%s&imgmax=%d",
+		$url = sprintf("http://picasaweb.google.com/data/feed/base/user/%s/albumid/%s?alt=json&fields=entry(media:group)&imgmax=%d%s",
 			$this -> config['user'],
 			$this -> albumId,
-			"?alt=json&fields=entry(media:group)", # Down here to shorten completed URL visually
-			$this -> config['max_width']
+			$this -> config['max_width'],
+			(!empty($this -> authKey) ? "&authkey={$this -> authKey}" : "")
 		);
 		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL,            $url);
-		curl_setopt($ch, CURLOPT_FAILONERROR,    TRUE);
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_FAILONERROR, TRUE);
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-		curl_setopt($ch, CURLOPT_TIMEOUT,        10);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 10);
 		if (!$ret = curl_exec($ch))
 			throw new Exception("An error occured in method curl()! - " . $this -> cURL . curl_error($ch));
 		return ($ret);
@@ -126,22 +134,22 @@ class PJPF {
 	 * @return string
 	 */
 	private function socket() {
-		$ret = NULL;
-		$url = "picasaweb.google.com";
-		$fp = fsockopen($url, 80, $errno, $errstr, 10);
+		$headers = TRUE;
+		$ret     = NULL;
+		$url     = "picasaweb.google.com";
+		$fp      = fsockopen($url, 80, $errno, $errstr, 10);
 		if (!$fp)
 			throw new Exception("An error occured in method socket()! - $errstr ($errno)");
 		else {
-			$out = sprintf("GET /data/feed/base/user/%s/albumid/%s?imgmax=%d%s HTTP/1.1\r\n",
+			$out = sprintf("GET /data/feed/base/user/%s/albumid/%s?alt=json&fields=entry(media:group)&imgmax=%d%s HTTP/1.1\r\n",
 				$this -> config['user'],
 				$this -> albumId,
 				$this -> config['max_width'],
-				"&alt=json&fields=entry(media:group)" # Down here to shorten completed URL visually
+				(!empty($this -> authKey) ? "&authkey={$this -> authKey}" : "")
 			);
 			$out .= "Host: $url\r\n";
 			$out .= "Connection: Close\r\n\r\n";
 			fwrite($fp, $out);
-			$headers = TRUE;
 			while (!feof($fp)) {
 				if (!$headers)
 					$ret .= fgets($fp, 128);
@@ -197,6 +205,7 @@ class PJPF {
 			}
 		}
 	}
+
 }
 
 #EOF pjfp.php
