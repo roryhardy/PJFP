@@ -18,7 +18,7 @@
  * @author Rory Hardy [GneatGeek]
  * @link oregonstate.edu/~croninhr/
  */
-class PJPF {
+class PJFP {
 	/**
 	 * The name and absolute path of the config file to use. This shouldn't need to be changed.
 	 * If the file is in the same dir as PJFP the path may be omitted!
