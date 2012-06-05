@@ -2,11 +2,11 @@
 /**
  * @package Picasa JSON Feed Parser
  * @category Libraries
- * @author Rory Hardy [GneatGeek]
+ * @author GneatGeek <oregonstate.edu/~croninhr>
+ * @copyright (c) 2012, Rory Hardy [GneatGeek]
+ * @license http://www.opensource.org/licenses/BSD-3-Clause BSD-3 Clause.  The license is included in the repo.
  * @link http://github.com/gneatgeek/PJFP
- * @version 1.4
- * @todo Make get_data() return associative arrays or both as well as integer based arrays.
- * @todo Add a caching mechanism
+ * @version 1.4.1
  */
 
 // --------------------------------------------------------------------------------------
@@ -15,8 +15,7 @@
  * Picasa JSON Feed Parser (PJFP) Class
  * This class parses a given Picasa RSS feed in JSON format.
  * It will get image URLs, width, height, and captions for a particular album.
- * @author Rory Hardy [GneatGeek]
- * @link oregonstate.edu/~croninhr/
+ * @author GneatGeek
  */
 class PJFP {
 	/**
@@ -59,7 +58,7 @@ class PJFP {
 	 * @param string $authKey - Key that picasa uses for limited/private galleries.
 	 * @throws Exception - Variable types are incorrect.
 	 */
-	public function __construct($albumId, $conf = NULL, $authKey = "") {
+	public function __construct($albumId, $authKey = "", $conf = NULL) {
 		$this -> albumId = $albumId;
 		$this -> authKey = $authKey;
 		$this -> build_conf($conf);
@@ -82,24 +81,60 @@ class PJFP {
 	 */
 	final private function build_conf(&$conf) {
 		include ($this -> config_file);
+
 		if (!isset($pjfp_conf))
 			throw new Exception("PJFP failed to load the config file [{$this -> config_file}]");
+
 		if (is_array($conf))
 			$pjfp_conf = array_merge($pjfp_conf, $conf);
+
 		foreach ($pjfp_conf as $key => $val)
 			$this -> set_conf($key, $val);
 	}
 
 	/**
 	 * Method to retrieve the 2D array of data created by json()
-	 * Format is array(URL, width, height, caption) int keys only ATM
+	 * Format is array(URL, width, height, caption)
 	 * Calls json() if data array is not yet built.
+	 * @param string $type - What type of array to request.  assoc/associative or both. Leave blank for numeric.
 	 * @return array
 	 */
 	public function get_data($type = NULL) {
 		if (empty($this -> data))
 			$this -> json();
-		return $this -> data;
+		echo($type); #Debug use Delete before launch
+		
+		switch(strtolower($type)) {
+			case "both" :
+				$tmp_array = $this -> data;
+				
+				foreach ($tmp_array as &$node) {
+					$node = array_merge($node, array(
+						"URL"     => $node[0],
+						"width"   => $node[1],
+						"height"  => $node[2], 
+						"caption" => $node[3])
+					);
+				}
+				
+				return $tmp_array;
+			case "assoc" :
+			case "associative" :
+				$tmp_array = $this -> data;
+				
+				foreach ($tmp_array as &$node) {
+					$node = array(
+						"URL"     => $node[0],
+						"width"   => $node[1], 
+						"height"  => $node[2],
+						"caption" => $node[3]
+					);
+				}
+				
+				return $tmp_array;
+		}
+
+		return $this -> data; # Catch all case
 	}
 
 	/**
@@ -109,20 +144,23 @@ class PJFP {
 	 * @return string
 	 */
 	private function curl() {
+		$ch  = curl_init();
 		$url = sprintf("http://picasaweb.google.com/data/feed/base/user/%s/albumid/%s?alt=json&fields=entry(media:group)&imgmax=%d%s",
 			$this -> config['user'],
 			$this -> albumId,
 			$this -> config['max_width'],
 			(!empty($this -> authKey) ? "&authkey={$this -> authKey}" : "")
 		);
-		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_FAILONERROR, TRUE);
+
+		curl_setopt($ch, CURLOPT_URL,            $url);
+		curl_setopt($ch, CURLOPT_FAILONERROR,    TRUE);
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-		curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+		curl_setopt($ch, CURLOPT_TIMEOUT,        10);
+
 		if (!$ret = curl_exec($ch))
 			throw new Exception("An error occured in method curl()! - " . $this -> cURL . curl_error($ch));
+
 		return ($ret);
 	}
 
@@ -138,10 +176,11 @@ class PJFP {
 		$ret     = NULL;
 		$url     = "picasaweb.google.com";
 		$fp      = fsockopen($url, 80, $errno, $errstr, 10);
+
 		if (!$fp)
 			throw new Exception("An error occured in method socket()! - $errstr ($errno)");
 		else {
-			$out = sprintf("GET /data/feed/base/user/%s/albumid/%s?alt=json&fields=entry(media:group)&imgmax=%d%s HTTP/1.1\r\n",
+			$out  = sprintf("GET /data/feed/base/user/%s/albumid/%s?alt=json&fields=entry(media:group)&imgmax=%d%s HTTP/1.1\r\n",
 				$this -> config['user'],
 				$this -> albumId,
 				$this -> config['max_width'],
@@ -150,6 +189,7 @@ class PJFP {
 			$out .= "Host: $url\r\n";
 			$out .= "Connection: Close\r\n\r\n";
 			fwrite($fp, $out);
+
 			while (!feof($fp)) {
 				if (!$headers)
 					$ret .= fgets($fp, 128);
@@ -157,6 +197,7 @@ class PJFP {
 					$headers = FALSE;
 			}
 			fclose($fp);
+
 			return ($ret);
 		}
 	}
@@ -168,14 +209,21 @@ class PJFP {
 	 */
 	private function json() {
 		$json = ($this -> config['use_curl'] ? $this -> curl() : $this -> socket());
+
 		if (!$arr = json_decode($json, TRUE))
 			throw new Exception("Could not Decode supplied JSON in method json()!");
+
 		foreach ($arr['feed']['entry'] as $v) {
 			$url = $v['media$group']['media$content'][0]['url'];
-			if ($this -> config['use_HTTPS']) {
+
+			if ($this -> config['use_HTTPS'])
 				$url = str_replace("http", "https", $url);
-			}
-			$this -> image_resize($v['media$group']['media$content'][0]['width'], $v['media$group']['media$content'][0]['height']);
+
+			$this -> image_resize(
+				$v['media$group']['media$content'][0]['width'],
+				$v['media$group']['media$content'][0]['height']
+			);
+
 			$this -> data[] = array(
 				$url,
 				$v['media$group']['media$content'][0]['width'],
@@ -197,15 +245,24 @@ class PJFP {
 	private function image_resize(&$width, &$height) {
 		if ($height > $this -> config['max_height']) {
 			if ($height == $width) {
-				$width = $this -> config['max_height'];
+				$width  = $this -> config['max_height'];
 				$height = $this -> config['max_height'];
 			} else {
-				$width = round($width * ($this -> config['max_height'] / $height));
+				$width  = round($width * ($this -> config['max_height'] / $height));
 				$height = $this -> config['max_height'];
 			}
 		}
 	}
 
+	/**
+	 * Getter method to access the config array.
+	 * @access public
+	 * @param $index - The array index to return.
+	 * @return mixed
+	 */
+	public function get_config($index) {
+		return ($this -> config[$index]);
+	}
 }
 
 #EOF pjfp.php

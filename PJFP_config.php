@@ -2,9 +2,8 @@
 /**
  * @package Picasa JSON Feed Parser
  * @category Configuration
- * @author Rory Hardy (GneatGeek)
+ * @author GneatGeek
  * @link http://github.com/gneatgeek/PJFP
- * @version 1.3
  */
 
 // ------------------------------------------------------------------------
