@@ -102,7 +102,6 @@ class PJFP {
 	public function get_data($type = NULL) {
 		if (empty($this -> data))
 			$this -> json();
-		echo($type); #Debug use Delete before launch
 		
 		switch(strtolower($type)) {
 			case "both" :
