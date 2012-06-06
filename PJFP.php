@@ -6,7 +6,7 @@
  * @copyright (c) 2012, Rory Hardy [GneatGeek]
  * @license http://www.opensource.org/licenses/BSD-3-Clause BSD-3 Clause.  The license is included in the repo.
  * @link http://github.com/gneatgeek/PJFP
- * @version 1.4.1
+ * @version 1.4.3
  */
 
 // --------------------------------------------------------------------------------------
@@ -25,6 +25,25 @@ class PJFP {
 	 * @var string
 	 */
 	private $config_file = "PJFP_config.php";
+
+	/**
+	 * Class constant for requesting an associative array as opposed to numeric.
+	 * @access public
+	 */
+	const NUMERIC = 0x01;
+
+	/**
+	 * Class constant for requesting an associative array as opposed to numeric.
+	 * @access public
+	 */
+	const ASSOC = 0x02;
+
+	/**
+	 * Class constant for requesting an associative array merged with a numeric array.
+	 * NUMERIC = 0x01, ASSOC = 0x02 -> ASSOC|NUMERIC = 0x03
+	 * @access public
+	 */
+	const BOTH = 0x03;
 
 	/**
 	 * Array of all loaded config values. (See PJFP_config.php)
@@ -96,44 +115,27 @@ class PJFP {
 	 * Method to retrieve the 2D array of data created by json()
 	 * Format is array(URL, width, height, caption)
 	 * Calls json() if data array is not yet built.
-	 * @param string $type - What type of array to request.  assoc/associative or both. Leave blank for numeric.
+	 * @param int $type - What type of array to request. PJFP::ASSOC for associative, PJFP::BOTH for mixed, and NULL for numeric.
 	 * @return array
 	 */
-	public function get_data($type = NULL) {
+	public function get_data($type = self::NUMERIC) {
 		if (empty($this -> data))
 			$this -> json();
-		
-		switch(strtolower($type)) {
-			case "both" :
-				$tmp_array = $this -> data;
-				
-				foreach ($tmp_array as &$node) {
-					$node = array_merge($node, array(
-						"URL"     => $node[0],
-						"width"   => $node[1],
-						"height"  => $node[2], 
-						"caption" => $node[3])
-					);
-				}
-				
-				return $tmp_array;
-			case "assoc" :
-			case "associative" :
-				$tmp_array = $this -> data;
-				
-				foreach ($tmp_array as &$node) {
-					$node = array(
-						"URL"     => $node[0],
-						"width"   => $node[1], 
-						"height"  => $node[2],
-						"caption" => $node[3]
-					);
-				}
-				
-				return $tmp_array;
+
+		# Needs to be before the numeric case and after json call.
+		$tmp_array = array_fill(0, count($this -> data), array());
+
+		if (($type & 0x01) != 0)# Numeric case
+			$tmp_array = $this -> data;
+
+		if (($type & 0x02) != 0) {# Associative case
+			static $keys = array("URL", "width", "height", "caption");
+
+			foreach ($this->data as $key => &$node)
+				$tmp_array[$key] = array_merge($tmp_array[$key], array_combine($keys, $node));
 		}
 
-		return $this -> data; # Catch all case
+		return $tmp_array;
 	}
 
 	/**
@@ -179,7 +181,7 @@ class PJFP {
 		if (!$fp)
 			throw new Exception("An error occured in method socket()! - $errstr ($errno)");
 		else {
-			$out  = sprintf("GET /data/feed/base/user/%s/albumid/%s?alt=json&fields=entry(media:group)&imgmax=%d%s HTTP/1.1\r\n",
+			$out = sprintf("GET /data/feed/base/user/%s/albumid/%s?alt=json&fields=entry(media:group)&imgmax=%d%s HTTP/1.1\r\n",
 				$this -> config['user'],
 				$this -> albumId,
 				$this -> config['max_width'],
@@ -187,6 +189,7 @@ class PJFP {
 			);
 			$out .= "Host: $url\r\n";
 			$out .= "Connection: Close\r\n\r\n";
+
 			fwrite($fp, $out);
 
 			while (!feof($fp)) {
@@ -195,6 +198,7 @@ class PJFP {
 				elseif (fgets($fp, 128) == "\r\n")
 					$headers = FALSE;
 			}
+
 			fclose($fp);
 
 			return ($ret);
