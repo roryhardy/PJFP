@@ -1,5 +1,7 @@
 Picasa JSON Feed Parser (PJFP) was developed to capture the RSS feed from Picasa in JSON. It currently parses images, image width, image height, and captions from the specified Picasa galleries. It returns a data array. What to do with that data is up to you.
 
+If you intend to use this script, be sure to download a tagged version.  HEAD is not tested for stability!
+
 Currently this system assumes the majority of images in an album are horizontal.
 
 PJFP_config.php IS REQUIRED by PJFP.php
