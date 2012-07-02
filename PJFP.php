@@ -28,20 +28,17 @@ class PJFP {
 
 	/**
 	 * Class constant for requesting an associative array as opposed to numeric.
-	 * @access public
 	 */
 	const NUMERIC = 0x01;
 
 	/**
 	 * Class constant for requesting an associative array as opposed to numeric.
-	 * @access public
 	 */
 	const ASSOC = 0x02;
 
 	/**
 	 * Class constant for requesting an associative array merged with a numeric array.
 	 * NUMERIC = 0x01, ASSOC = 0x02 -> ASSOC|NUMERIC = 0x03
-	 * @access public
 	 */
 	const BOTH = 0x03;
 
@@ -67,18 +64,17 @@ class PJFP {
 	 * Key that picasa uses for limited/private galleries.
 	 * @var string
 	 */
-	private $authKey;
+	private $auth_key;
 
 	/**
 	 * Constructor
-	 * @param string $albumID - Picasa RSS album ID.
-	 * @param array $conf - Associative array used to override default settings in config.inc.  See PJFP_config.php for parameters
-	 * @param string $authKey - Key that picasa uses for limited/private galleries.
-	 * @throws Exception - Variable types are incorrect.
+	 * @param string $album_id - Picasa RSS album ID.
+	 * @param string $auth_key - Key that picasa uses for limited/private galleries.
+	 * @param array $conf - Associative array used to override default settings in config.inc. See PJFP_config.php for parameters
 	 */
-	public function __construct($albumId, $authKey = "", $conf = NULL) {
-		$this -> albumId = $albumId;
-		$this -> authKey = $authKey;
+	public function __construct($album_id, $auth_key = "", $conf = NULL) {
+		$this -> album_id = $album_id;
+		$this -> auth_key = $auth_key;
 		$this -> build_conf($conf);
 	}
 
@@ -144,11 +140,11 @@ class PJFP {
 	 */
 	private function curl() {
 		$ch  = curl_init();
-		$url = sprintf("http://picasaweb.google.com/data/feed/base/user/%s/albumid/%s?alt=json&fields=entry(media:group)&imgmax=%d%s",
+		$url = sprintf("http://picasaweb.google.com/data/feed/base/user/%s/album_id/%s?alt=json&fields=entry(media:group)&imgmax=%d%s",
 			$this -> config['user'],
-			$this -> albumId,
+			$this -> album_id,
 			$this -> config['max_width'],
-			(!empty($this -> authKey) ? "&authkey={$this -> authKey}" : "")
+			(!empty($this -> auth_key) ? "&authkey={$this -> auth_key}" : "")
 		);
 
 		curl_setopt($ch, CURLOPT_URL,            $url);
@@ -158,7 +154,7 @@ class PJFP {
 		curl_setopt($ch, CURLOPT_TIMEOUT,        10);
 
 		if (!$ret = curl_exec($ch))
-			throw new Exception("An error occured in method curl()! - " . $this -> cURL . curl_error($ch));
+			throw new Exception("An error occured in method curl()! - " . $this -> curl . curl_error($ch));
 
 		return ($ret);
 	}
@@ -178,11 +174,11 @@ class PJFP {
 		if (!$fp)
 			throw new Exception("An error occured in method socket()! - $errstr ($errno)");
 		else {
-			$out = sprintf("GET /data/feed/base/user/%s/albumid/%s?alt=json&fields=entry(media:group)&imgmax=%d%s HTTP/1.1\r\n",
+			$out = sprintf("GET /data/feed/base/user/%s/album_id/%s?alt=json&fields=entry(media:group)&imgmax=%d%s HTTP/1.1\r\n",
 				$this -> config['user'],
-				$this -> albumId,
+				$this -> album_id,
 				$this -> config['max_width'],
-				(!empty($this -> authKey) ? "&authkey={$this -> authKey}" : "")
+				(!empty($this -> auth_key) ? "&authkey={$this -> auth_key}" : "")
 			);
 			$out .= "Host: $url\r\n";
 			$out .= "Connection: Close\r\n\r\n";
@@ -252,7 +248,7 @@ class PJFP {
 
 	/**
 	 * Getter method to access the config array.
-	 * @param string $index - The array index to return.
+	 * @param string $index - The config array index to return.
 	 * @return mixed
 	 */
 	public function get_config($index) {
