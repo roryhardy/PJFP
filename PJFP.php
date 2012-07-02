@@ -68,7 +68,7 @@ class PJFP {
 
 	/**
 	 * Constructor
-	 * @param string $album_id - Picasa RSS album ID.
+	 * @param string $album_id - Picasa RSS album ID. Pass as a string on 32 bit systems to avoid potential issues!
 	 * @param string $auth_key - Key that picasa uses for limited/private galleries.
 	 * @param array $conf - Associative array used to override default settings in config.inc. See PJFP_config.php for parameters
 	 */
