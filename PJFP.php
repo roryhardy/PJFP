@@ -140,7 +140,7 @@ class PJFP {
 	 */
 	private function curl() {
 		$ch  = curl_init();
-		$url = sprintf("http://picasaweb.google.com/data/feed/base/user/%s/albumid/%s?alt=json&fields=entry(media:group)&imgmax=%d%s",
+		$url = sprintf("http://picasaweb.google.com/data/feed/base/user/%s/albumid/%u?alt=json&fields=entry(media:group)&imgmax=%u%s",
 			$this -> config['user'],
 			$this -> album_id,
 			$this -> config['max_width'],
@@ -174,7 +174,7 @@ class PJFP {
 		if (!$fp)
 			throw new Exception("An error occured in method socket()! - $errstr ($errno)");
 		else {
-			$out = sprintf("GET /data/feed/base/user/%s/albumid/%s?alt=json&fields=entry(media:group)&imgmax=%d%s HTTP/1.1\r\n",
+			$out = sprintf("GET /data/feed/base/user/%s/albumid/%u?alt=json&fields=entry(media:group)&imgmax=%u%s HTTP/1.1\r\n",
 				$this -> config['user'],
 				$this -> album_id,
 				$this -> config['max_width'],
