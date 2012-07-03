@@ -6,7 +6,7 @@
  * @copyright (c) 2012, Rory Hardy [GneatGeek]
  * @license http://www.opensource.org/licenses/BSD-3-Clause BSD-3 Clause.  The license is included in the repo.
  * @link http://github.com/gneatgeek/PJFP
- * @version 1.4.5
+ * @version 1.4.9
  */
 
 // --------------------------------------------------------------------------------------
@@ -15,7 +15,7 @@
  * Picasa JSON Feed Parser (PJFP) Class
  * This class parses a given Picasa RSS feed in JSON format.
  * It will get image URLs, width, height, and captions for a particular album.
- * @author GneatGeek
+ * @author GneatGeek [Rory Hardy]
  */
 class PJFP {
 	/**
@@ -27,7 +27,7 @@ class PJFP {
 	private $config_file = "PJFP_config.php";
 
 	/**
-	 * Class constant for requesting an associative array as opposed to numeric.
+	 * Class constant for requesting an numeric array. This is selected by default.
 	 */
 	const NUMERIC = 0x01;
 
@@ -68,7 +68,7 @@ class PJFP {
 
 	/**
 	 * Constructor
-	 * @param string $album_id - Picasa RSS album ID. Pass as a string on 32 bit systems to avoid potential issues!
+	 * @param string $album_id - Picasa RSS album ID. Pass as a string on 32 bit systems to avoid potential issues.
 	 * @param string $auth_key - Key that picasa uses for limited/private galleries.
 	 * @param array $conf - Associative array used to override default settings in config.inc. See PJFP_config.php for parameters
 	 */
