@@ -6,7 +6,7 @@
  * @copyright (c) 2012, Rory Hardy [GneatGeek]
  * @license http://www.opensource.org/licenses/BSD-3-Clause BSD-3 Clause.  The license is included in the repo.
  * @link http://github.com/gneatgeek/PJFP
- * @version 1.4.9
+ * @version 1.5
  */
 
 // --------------------------------------------------------------------------------------
