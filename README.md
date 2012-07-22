@@ -28,9 +28,9 @@ Adding:
 
 >\<FilesMatch "\\.inc$"\>
 
->Order allow,deny
+>>Order allow,deny
 
->Deny from all
+>>Deny from all
 
 >\</FilesMatch\>
 
