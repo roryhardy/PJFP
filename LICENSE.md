@@ -1,3 +1,5 @@
+# [LICENSE, BSD-3](http://opensource.org/licenses/BSD-3-Clause)
+
 Copyright (c) 2011, Rory Hardy \[GneatGeek\]
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
