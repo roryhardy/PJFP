@@ -4,7 +4,7 @@
  * @category Libraries
  * @author GneatGeek <oregonstate.edu/~croninhr>
  * @copyright (c) 2012, Rory Hardy [GneatGeek]
- * @license http://www.opensource.org/licenses/BSD-3-Clause BSD-3 Clause.  The license is included in the repo.
+ * @license http://www.opensource.org/licenses/BSD-3-Clause BSD-3 Clause. The license is included in the repo.
  * @link http://github.com/gneatgeek/PJFP
  * @version 1.5
  */
@@ -12,7 +12,7 @@
 // --------------------------------------------------------------------------------------
 
 /**
- * Picasa JSON Feed Parser (PJFP) Class
+ * Picasa JSON Feed Parser (PJFP) Class: 
  * This class parses a given Picasa RSS feed in JSON format.
  * It will get image URLs, width, height, and captions for a particular album.
  * @author GneatGeek [Rory Hardy]
@@ -27,7 +27,7 @@ class PJFP {
 	private $config_file = "PJFP_config.php";
 
 	/**
-	 * Class constant for requesting an numeric array. This is selected by default.
+	 * Class constant for requesting a numeric array. This is selected by default.
 	 */
 	const NUMERIC = 0x01;
 
@@ -55,7 +55,7 @@ class PJFP {
 	private $data = array();
 
 	/**
-	 * Album ID of album to parse.
+	 * Album ID of the album to parse.
 	 * @var int
 	 */
 	private $album_id;
@@ -69,8 +69,8 @@ class PJFP {
 	/**
 	 * Constructor
 	 * @param string $album_id - Picasa RSS album ID. Pass as a string on 32 bit systems to avoid potential issues.
-	 * @param string $auth_key - Key that picasa uses for limited/private galleries.
-	 * @param array $conf - Associative array used to override default settings in config.inc. See PJFP_config.php for parameters
+	 * @param string $auth_key - Key that Picasa uses for limited/private galleries.
+	 * @param array $conf - Associative array used to override default settings in PJFP_config.php. See PJFP_config.php for parameter details.
 	 */
 	public function __construct($album_id, $auth_key = "", $conf = NULL) {
 		$this -> album_id = $album_id;
@@ -106,8 +106,8 @@ class PJFP {
 	}
 
 	/**
-	 * Retrieve the 2D array of data created by json()
-	 * Format is array(URL, width, height, caption)
+	 * Retrieve the 2D array of data created by json().
+	 * Format is array(URL, width, height, caption).
 	 *   Default is numeric indicies.
 	 * Calls json() if data array is not yet built.
 	 * @param int $type - What type of array to request. PJFP::ASSOC for associative, PJFP::BOTH for mixed
@@ -161,7 +161,7 @@ class PJFP {
 
 	/**
 	 * This is simply an alternative to curl since some systems may not have it available.
-	 * Both methods ultimately do the same thing.
+	 * Both methods ultimately do the same thing!
 	 * @throws Exception - socket failed
 	 * @return string
 	 */
@@ -200,13 +200,13 @@ class PJFP {
 
 	/**
 	 * Method to parse the JSON data fetched from Picasa
-	 * Sets:  $this->data to decoded JSON as an array (NOT AN OBJECT)
+	 * Sets: $this->data to decoded JSON as an array (NOT AN OBJECT)
 	 */
 	private function json() {
 		$json = ($this -> config['use_curl'] ? $this -> curl() : $this -> socket());
 
 		if (!$arr = json_decode($json, TRUE))
-			throw new Exception("Could not Decode supplied JSON in method json()!");
+			throw new Exception("Could not decode supplied JSON in method json()!");
 
 		foreach ($arr['feed']['entry'] as $v) {
 			$url = $v['media$group']['media$content'][0]['url'];
