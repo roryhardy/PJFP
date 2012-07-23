@@ -26,24 +26,25 @@ The below example generates HTML for a javascript slide show.
 
 <!-- language: lang-php -->
 
-    <?php
-    require_once('PJFP.php'); # Include PJFP
-    try{
-        $gallery = new PJFP(ALBUMID); # Pass in the album ID of your gallery
-        $data    = $gallery->get_data(); # Numeric Keys
-        foreach($data as $val){
-            printf("<div><img src=\"%s\" width=\"%s\" height=\"%s\" alt=\"Gallery Photo\"><br><p>%s</p></div>\n",
-            $val[0],
-            $val[1],
-            $val[2],
-            htmlentities($val[3])
-            );
-        }catch (Exception $e){
-            echo("An Error occured. Caught Exception: {$e->getMessage()}");
-        }
-    }
-    ?>
-
+```php
+<?php
+	require_once('PJFP.php'); # Include PJFP
+	try{
+		$gallery = new PJFP(ALBUMID); # Pass in the album ID of your gallery
+		$data    = $gallery->get_data(); # Numeric Keys
+		foreach($data as $val){
+			printf("<div><img src=\"%s\" width=\"%s\" height=\"%s\" alt=\"Gallery Photo\"><br><p>%s</p></div>\n",
+				$val[0],
+				$val[1],
+				$val[2],
+				htmlentities($val[3])
+			);
+		}catch (Exception $e){
+			echo("An Error occured. Caught Exception: {$e->getMessage()}");
+		}
+	}
+?>
+```
 ## Notes
 
 PJFP\_config.php __IS REQUIRED__ by PJFP.php
