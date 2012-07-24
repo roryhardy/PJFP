@@ -19,7 +19,7 @@ Clone the git repo - `git clone git@github.com:gneatgeek/PJFP.git` - or [downloa
 
 ## Demos & Example
 
-* [GneatGeek Central](http://people.oregonstate.edu/~croninhr/)
+* [GneatGeek Central](http://people.oregonstate.edu/~croninhr/birds/)
 * [OSU Foundation](http://osufoundation.org/fundraisingpriorities/facilities/lpsc/landing.htm)
 
 The below example generates HTML for a javascript slide show.
