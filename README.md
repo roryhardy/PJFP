@@ -24,31 +24,29 @@ Clone the git repo - `git clone git@github.com:gneatgeek/PJFP.git` - or [downloa
 
 The below example generates HTML for a javascript slide show.
 
-<!-- language: lang-php -->
-
 ```php
 <?php
-	require_once('PJFP.php'); # Include PJFP
-	try{
-		$gallery = new PJFP(ALBUMID); # Pass in the album ID of your gallery
-		$data    = $gallery->get_data(); # Numeric Keys
-		foreach($data as $val){
-			printf("<div><img src=\"%s\" width=\"%s\" height=\"%s\" alt=\"Gallery Photo\"><br><p>%s</p></div>\n",
-				$val[0],
-				$val[1],
-				$val[2],
-				htmlentities($val[3])
-			);
-		}catch (Exception $e){
-			echo("An Error occured. Caught Exception: {$e->getMessage()}");
-		}
+require_once('PJFP.php'); # Include PJFP
+try{
+	$gallery = new PJFP(ALBUMID); # Pass in the album ID of your gallery
+	$data    = $gallery->get_data(); # Numeric Keys
+	foreach($data as $val){
+		printf("<div><img src=\"%s\" width=\"%s\" height=\"%s\" alt=\"Gallery Photo\"><br><p>%s</p></div>\n",
+			$val[0],
+			$val[1],
+			$val[2],
+			htmlentities($val[3])
+		);
 	}
+}catch (Exception $e){
+	echo("An Error occurred. Caught Exception: {$e->getMessage()}");	
+}
 ?>
 ```
+
 ## Notes
 
-PJFP\_config.php __IS REQUIRED__ by PJFP.php
-Be sure to have it available or this system will not function! You can specify an alternate filename and/or path in the class variables.
+PJFP\_config.php __IS REQUIRED__ by PJFP.php. Be sure to have it available or this system will not function! You can specify an alternate filename and/or path in the class variables.
 
 The __album ID__ of your gallery can be located in the url on the __RSS__ feed.   
 picasaweb.google.com/data/feed/base/user/113393706713351407880/albumid/__5677978555944856817__?alt=rss&kind=photo&hl=en_US
@@ -63,4 +61,4 @@ Adding:
     </FilesMatch>
 
 to your .htaccess file is recommended.
-If a .inc file is requested, all of the code will be revealed as plain text (which is usually very undesirable).
+If a .inc file is requested without this rule all of the code may be revealed as plain text (which is usually very undesirable).
